@@ -16,8 +16,8 @@
 
 <script type="text/x-template" id="app-template">
     <v-app>
-        <v-card justify-center align-center :width="totalWidth" height="500">
-            <v-card-text>
+        <v-card class="mx-auto my-12" :width="width">
+            <v-card-text column align-center justify-center>
                 <v-container>
                     <v-row justify-center align-center>
                         <v-col>
@@ -28,7 +28,7 @@
                         </v-col>
                     </v-row>
                     <v-row v-if="isStarted">
-                        <v-col v-for="item in dataArr">
+                        <v-col align-center justify-center v-for="item in dataArr">
                             <v-btn :color="item.color" @click="clickButton(item)">{{item.val}}</v-btn>
                         </v-col>
                     </v-row>
@@ -52,6 +52,7 @@
         template: '#app-template',
         vuetify: new Vuetify(),
         data: () => ({
+            width: 300,
             isStarted: false,
             colSize: 3,
             dataArr: [],
