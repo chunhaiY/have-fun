@@ -16,7 +16,7 @@
 
 <script type="text/x-template" id="app-template">
     <v-app>
-        <v-card justify-center align-center :width="totalWidth" height="500">
+        <v-card justify-center align-center>
             <v-card-text>
                 <v-container>
                     <v-row justify-center align-center>
@@ -24,7 +24,7 @@
                             <v-btn @click="start">开始</v-btn>
                         </v-col>
                         <v-col>
-                            <v-text-field label="几列" v-model="colSize" ></v-text-field>
+                            <v-text-field label="多少个数字" v-model="numberSize"></v-text-field>
                         </v-col>
                     </v-row>
                     <v-row v-if="isStarted">
@@ -33,8 +33,24 @@
                         </v-col>
                     </v-row>
                     <v-row>
-                        <v-col v-if="elapsedTime">
-                            <div v-for="(item, i) in elapsedTime">第{{elapsedTime.length - i }}次，耗时：{{item}}</div>
+                        <v-simple-table>
+                            <template v-slot:default>
+                                <tbody>
+                                <tr
+                                        v-for="item in desserts"
+                                        :key="item.name"
+                                >
+                                    <td>{{ item.name }}</td>
+                                    <td>{{ item.calories }}</td>
+                                </tr>
+                                </tbody>
+                            </template>
+                        </v-simple-table>
+                    </v-row>
+                    <v-row>
+                        <v-col v-if="scores">
+                            <div v-for="(item, i) in scores">第{{scores.length - i }}次，{{item.n}}个数字，耗时：{{item.t}}
+                            </div>
                         </v-col>
                     </v-row>
                 </v-container>
@@ -53,12 +69,12 @@
         vuetify: new Vuetify(),
         data: () => ({
             isStarted: false,
-            colSize: 3,
+            numberSize: 9,
             dataArr: [],
             nextVal: 1,
             beginTime: null,
             endTime: null,
-            elapsedTime: []
+            scores: []
         }),
 
         computed: {},
@@ -77,12 +93,12 @@
                 this.totalWidth = this.colSize * 100 + 50;
 
                 let arr = [];
-                for (let i = 1; i <= this.colSize * this.colSize; i++) {
+                for (let i = 1; i <= this.numberSize; i++) {
                     arr.push(i);
                 }
 
                 let tmpArr = [];
-                for (let i = 0; i < this.colSize * this.colSize; i++) {
+                for (let i = 0; i < this.numberSize; i++) {
                     let idx = Math.round(Math.random() * (arr.length - 1))
                     let arrElement = arr[idx];
                     arr.splice(idx, 1)
@@ -106,9 +122,12 @@
                 if (item.val == this.nextVal) {
                     item.color = 'primary'
 
-                    if (item.val == this.colSize * this.colSize) {
+                    if (item.val == this.numberSize) {
                         this.endTime = new Date().getTime();
-                        this.elapsedTime.unshift((this.endTime - this.beginTime) / 1000)
+                        this.scores.unshift({
+                            "t": (this.endTime - this.beginTime) / 1000,
+                            'n': this.numberSize
+                        })
                     }
                     this.nextVal++;
                 }
