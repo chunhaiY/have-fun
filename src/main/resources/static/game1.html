@@ -16,10 +16,10 @@
 
 <script type="text/x-template" id="app-template">
     <v-app>
-        <v-card class="mx-auto my-12" :width="width">
+        <v-card class="mx-auto my-12" :width="totalWidth">
             <v-card-text column align-center justify-center>
                 <v-container>
-                    <v-row justify-center align-center>
+                    <v-row>
                         <v-col>
                             <v-btn @click="start">开始</v-btn>
                         </v-col>
@@ -33,7 +33,7 @@
                         </v-col>
                     </v-row>
                     <v-row>
-                        <v-col v-if="elapsedTime">
+                        <v-col v-if="scores">
                             <div v-for="(item, i) in scores">第{{scores.length - i }}次，{{item.n}}个数字，耗时：{{item.t}}
                         </v-col>
                     </v-row>
@@ -52,7 +52,7 @@
         template: '#app-template',
         vuetify: new Vuetify(),
         data: () => ({
-            width: 300,
+            totalWidth: 300,
             isStarted: false,
             numberSize: 9,
             dataArr: [],
@@ -75,7 +75,7 @@
 
                 let vm = this
 
-                this.totalWidth = this.colSize * 100 + 50;
+                this.totalWidth = Math.round(Math.sqrt(this.numberSize)) * 100;
 
                 let arr = [];
                 for (let i = 1; i <= this.numberSize; i++) {
