@@ -16,25 +16,31 @@
 
 <script type="text/x-template" id="app-template">
     <v-app>
-        <v-card class="mx-auto my-12" :width="totalWidth">
-            <v-card-text column align-center justify-center>
+        <v-card class="mx-auto my-12">
+            <v-card-text>
                 <v-container>
                     <v-row>
                         <v-col>
                             <v-btn @click="start">开始</v-btn>
                         </v-col>
+                    </v-row>
+                    <v-row >
                         <v-col>
-                            <v-text-field label="多少个数字" v-model="numberSize"></v-text-field>
+                            <v-text-field  label="行" v-model="rowCount"></v-text-field>
+                        </v-col>
+                        <v-col>
+                            <v-text-field  label="列" v-model="columnCount"></v-text-field>
                         </v-col>
                     </v-row>
-                    <v-row v-if="isStarted">
-                        <v-col align-center justify-center v-for="item in dataArr">
+                    <v-row class="mygrid" v-if="isStarted" v-for="row in dataArr">
+                        <v-col v-for="item in row">
                             <v-btn :color="item.color" @click="clickButton(item)">{{item.val}}</v-btn>
                         </v-col>
                     </v-row>
                     <v-row>
                         <v-col v-if="scores">
-                            <div v-for="(item, i) in scores">第{{scores.length - i }}次，{{item.n}}个数字，耗时：{{item.t}}
+                            <div v-for="(item, i) in scores">第{{scores.length - i}}次，{{item.n}}个数字，耗时：{{item.t}}, 错误：{{item.ec}}
+                            </div>
                         </v-col>
                     </v-row>
                 </v-container>
@@ -54,12 +60,14 @@
         data: () => ({
             totalWidth: 300,
             isStarted: false,
-            numberSize: 9,
-            dataArr: [],
+            dataArr: [[]],
             nextVal: 1,
             beginTime: null,
             endTime: null,
-            scores: []
+            scores: [],
+            columnCount: 3,
+            rowCount: 3,
+            errorCount : 0
         }),
 
         computed: {},
@@ -68,26 +76,48 @@
 
         created() {
             this.initialize()
+
+            const item = localStorage.getItem("scores");
+            if (item){
+                const parse = JSON.parse(item);
+                if (parse){
+                    parse.forEach( v => {
+                        this.scores.push(v)
+                    })
+                }
+            }
+
         },
 
         methods: {
             initialize() {
 
                 let vm = this
-                this.totalWidth = Math.round(Math.sqrt(this.numberSize)) * 99;
+
+                const numberSize = this.columnCount * this.rowCount;
+                this.totalWidth = this.columnCount * 100;
 
                 let arr = [];
-                for (let i = 1; i <= this.numberSize; i++) {
+                for (let i = 1; i <= numberSize; i++) {
                     arr.push(i);
                 }
 
                 let tmpArr = [];
-                for (let i = 0; i < this.numberSize; i++) {
-                    let idx = Math.round(Math.random() * (arr.length - 1))
-                    let arrElement = arr[idx];
-                    arr.splice(idx, 1)
-                    tmpArr.push({"val": arrElement, "color": "normal"})
+
+                for (let i = 0; i < this.rowCount; i++) {
+                    for (let j = 0; j < this.columnCount; j++) {
+
+                        let idx = Math.round(Math.random() * (arr.length - 1))
+                        let arrElement = arr[idx];
+                        arr.splice(idx, 1)
+
+                        if (!tmpArr[i]) {
+                            tmpArr.push([])
+                        }
+                        tmpArr[i].push({"val": arrElement, "color": "normal"})
+                    }
                 }
+
 
                 this.dataArr = tmpArr;
             },
@@ -99,22 +129,30 @@
                 this.isStarted = true;
                 this.beginTime = new Date().getTime();
                 this.nextVal = 1;
+                this.errorCount = 0;
             },
 
             clickButton(item) {
-                console.log(item);
+                // console.log(item);
 
                 if (item.val == this.nextVal) {
                     item.color = 'primary'
 
-                    if (item.val == this.numberSize) {
+                    let numberSize = this.columnCount * this.rowCount;
+                    if (item.val == numberSize) {
                         this.endTime = new Date().getTime();
                         this.scores.unshift({
                             "t": (this.endTime - this.beginTime) / 1000,
-                            'n': this.numberSize
+                            'n': numberSize,
+                            'ec' : this.errorCount
                         })
+
+                        localStorage.setItem("scores", JSON.stringify(this.scores))
                     }
                     this.nextVal++;
+                }
+                else {
+                    this.errorCount++;
                 }
             }
 
@@ -123,6 +161,14 @@
     })
 </script>
 
+<style>
+
+
+    /*.mygrid button {*/
+    /*    min-width: 20px !important;*/
+    /*    width: 50px;*/
+    /*}*/
+</style>
 </body>
 
 </html>
